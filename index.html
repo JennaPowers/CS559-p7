@@ -1,0 +1,103 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Space Scene</title>
+    <link rel="stylesheet" href="index.css">
+  </head>
+  <body>
+    <canvas id="space" width="800" height="800"></canvas>
+    <script type="text/javascript" src="gl-matrix-min.js"></script>
+    <script src="Spaceship.js"></script>
+    <script src="Star.js"></script>
+    <script src="Spiral.js"></script>
+    <script>
+        function App() {
+          var canvas;
+          var context;
+
+          var stars = [];
+          var spirals = [];
+
+          // this function repeatedly calls itself to draw and animate both canvases
+          function draw() {
+            context.clearRect(0, 0, canvas.width, canvas.height);
+            stars.forEach(star => star.draw());
+
+            // spiral1.update();
+            // spiral1.draw();
+            spirals.forEach(spiral => spiral.update());
+            spirals.forEach(spiral => spiral.draw());
+
+            spaceship.update();
+            spaceship.draw();
+
+            window.requestAnimationFrame(draw);
+          }
+
+          // first canvas
+          canvas = document.getElementById('space');
+          context = canvas.getContext('2d');        
+
+          // spaceship and star objects
+          var spaceship = new Spaceship(context, 300, 600);
+
+          var star1 = new Star(context,200,50,10,6,2,"#ffe38f");
+          var star2 = new Star(context,300,150,10,5,2,"#f8ff96");
+          var star3 = new Star(context,100,100,10,7,2,"#f58992");
+          var star4 = new Star(context,400,500,10,6,2,"#f8ff96");
+          var star5 = new Star(context,350,300,10,6,2,"#fcb890");
+          var star6 = new Star(context,200,400,10,7,2,"#ffeade");
+          var star7 = new Star(context,50,700,10,6,2,"#ffe38f");
+          var star8 = new Star(context,600,600,10,5,2,"#ffeade");
+          var star9 = new Star(context,650,250,10,5,2,"#ffeade");
+
+          // spiral function
+          var start = 25.0;
+          var slope = 25.0;
+          var Cspiral = function(t) {
+              var R = slope * t + start;
+              var x = R * Math.cos(2.0 * Math.PI * t);
+              var y = R * Math.sin(2.0 * Math.PI * t);
+              return [x,y];
+          }
+
+          // spiral objects
+          var Tspiral_to_canvas = mat3.create();
+          mat3.fromTranslation(Tspiral_to_canvas, [400,150]);
+          var spiral1 = new Spiral(context, 0.0, 5.0, 100, Cspiral, Tspiral_to_canvas, 400, 150, "rgba(193, 66, 66, 0)", "#ffeade", 25.0, 25.0);
+
+          var Tspiral_to_canvas2 = mat3.create();
+          mat3.fromTranslation(Tspiral_to_canvas2, [100,500]);
+          var spiral2 = new Spiral(context, 0.0, 5.0, 100, Cspiral, Tspiral_to_canvas2, 100, 550, "rgba(193, 66, 66, 0)", "#f8ff96", 25.0, 25.0);
+
+          var Tspiral_to_canvas3 = mat3.create();
+          mat3.fromTranslation(Tspiral_to_canvas3, [300,450]);
+          var spiral3 = new Spiral(context, 0.0, 5.0, 100, Cspiral, Tspiral_to_canvas3, 550, 450, "rgba(193, 66, 66, 0)", "#fcb890", 25.0, 25.0);
+
+          var Tspiral_to_canvas4 = mat3.create();
+          mat3.fromTranslation(Tspiral_to_canvas4, [600,600]);
+          var spiral4 = new Spiral(context, 0.0, 5.0, 100, Cspiral, Tspiral_to_canvas4, 600, 600, "rgba(193, 66, 66, 0)", "#f58992", 25.0, 25.0);
+
+          // adding stars to the stars array
+          stars.push(star1);
+          stars.push(star2);
+          stars.push(star3);
+          stars.push(star4);
+          stars.push(star5);
+          stars.push(star6);
+          stars.push(star7);
+          stars.push(star8);
+          stars.push(star9);
+
+          spirals.push(spiral1);
+          spirals.push(spiral2);
+          spirals.push(spiral3);
+          spirals.push(spiral4);
+
+          draw();  
+          } 
+
+      window.onload = App;
+    </script>
+  </body>
+</html>

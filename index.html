@@ -5,51 +5,169 @@
     <link rel="stylesheet" href="index.css">
   </head>
   <body>
-    <canvas id="space" width="800" height="800"></canvas>
+    <canvas id="curves" width="1000" height="500"></canvas>
     <script type="text/javascript" src="gl-matrix-min.js"></script>
-    <script src="Spaceship.js"></script>
-    <script src="Star.js"></script>
     <script src="Spiral.js"></script>
     <script>
         function App() {
-          var canvas;
-          var context;
-
-          var stars = [];
+          var canvas = document.getElementById('curves');
+          var context = canvas.getContext('2d');
+          canvas.style.background = "black";
+          var tParam = 0;
           var spirals = [];
 
-          // this function repeatedly calls itself to draw and animate both canvases
+          // first color
+          let xP1 = -(Math.random() * 0.8);
+          let yP1 = Math.random() * 0.8;
+          let rP1 = Math.random() * 6 + 2;
+
+          let xP2 = -(Math.random() * 0.5);
+          let yP2 = Math.random() * 0.8;
+          let rP2 = Math.random() * 6 + 1;
+
+          let xP3 = -(Math.random() * 0.5);
+          let yP3 = -(Math.random() * 0.3);
+          let rP3 = Math.random() * 4;
+
+          let xP4 = -(Math.random() * 0.5);
+          let yP4 = Math.random() * 0.5;
+          let rP4 = Math.random() * 8 + 2;
+
+          // second color
+          let xB1 = -(Math.random() * 0.4);
+          let yB1 = Math.random() * 0.6;
+          let rB1 = Math.random() * 4 + 1;
+
+          let xB2 = -(Math.random() * 0.5);
+          let yB2 = Math.random() * 0.6;
+          let rB2 = Math.random() * 6 + 1;
+
+          let xB3 = -(Math.random() * 0.5);
+          let yB3 = Math.random() * 0.3;
+          let rB3 = Math.random() * 7 + 1;
+
+          let xB4 = -(Math.random() * 0.3);
+          let yB4 = -(Math.random() * 0.4);
+          let rB4 = Math.random() * 6;
+
+          // third color
+          let xG1 = -(Math.random() * 0.4);
+          let yG1 = Math.random() * 0.2;
+          let rG1 = Math.random() * 4 + 1;
+
+          let xG2 = -(Math.random() * 0.3);
+          let yG2 = Math.random() * 0.4;
+          let rG2 = Math.random() * 2 + 1;
+
+          let xG3 = -(Math.random() * 0.5);
+          let yG3 = Math.random() * 0.5;
+          let rG3 = Math.random() * 6 + 2;
+
+          let xG4 = -(Math.random() * 0.5);
+          let yG4 = -(Math.random() * 0.3);
+          let rG4 = Math.random() * 8;
+          
+  
           function draw() {
             context.clearRect(0, 0, canvas.width, canvas.height);
-            stars.forEach(star => star.draw());
+           
+            var curve_to_canvas = mat3.create();
+            mat3.fromTranslation(curve_to_canvas,[0,350]);
+	          mat3.scale(curve_to_canvas,curve_to_canvas,[100,-150]);
 
-            // spiral1.update();
-            // spiral1.draw();
+            context.setLineDash([15, 10]);
+            drawTrajectory(0.0,1.0,100,C0,curve_to_canvas,"#868387");
+	          drawTrajectory(0.0,1.0,100,C1,curve_to_canvas,"#868387");
+            drawTrajectory(0.0,1.0,100,C2,curve_to_canvas,"#868387");
+            drawTrajectory(0.0,1.0,100,C3,curve_to_canvas,"#868387");
+            drawTrajectory(0.0,1.0,100,C4,curve_to_canvas,"#868387");
+
+            context.setLineDash([2, 10]);
+            var Tgreen_to_blue = mat3.create();
+            mat3.fromTranslation(Tgreen_to_blue, Ccomp(tParam));
+            var coaster_to_canvas = mat3.create();
+            mat3.multiply(coaster_to_canvas, curve_to_canvas, Tgreen_to_blue);
+            drawObject(coaster_to_canvas);
+
             spirals.forEach(spiral => spiral.update());
             spirals.forEach(spiral => spiral.draw());
 
-            spaceship.update();
-            spaceship.draw();
-
+            if (tParam > 5) {
+              tParam = 0;
+            } else {
+              tParam += 1 * 0.01;
+            }
+    
             window.requestAnimationFrame(draw);
           }
+          var Hermite = function(t) {
+	          return [
+              2*t*t*t-3*t*t+1,
+              t*t*t-2*t*t+t,
+              -2*t*t*t+3*t*t,
+              t*t*t-t*t
+            ];
+          }
 
-          // first canvas
-          canvas = document.getElementById('space');
-          context = canvas.getContext('2d');        
+        function Cubic(basis,P,t){
+            var b = basis(t);
+            var result=vec2.create();
+            vec2.scale(result,P[0],b[0]);
+            vec2.scaleAndAdd(result,result,P[1],b[1]);
+            vec2.scaleAndAdd(result,result,P[2],b[2]);
+            vec2.scaleAndAdd(result,result,P[3],b[3]);
+            return result;
+        }
 
-          // spaceship and star objects
-          var spaceship = new Spaceship(context, 300, 600);
+        var p0=[0,0];
+        var d0=[0,0];
 
-          var star1 = new Star(context,200,50,10,6,2,"#ffe38f");
-          var star2 = new Star(context,300,150,10,5,2,"#f8ff96");
-          var star3 = new Star(context,100,100,10,7,2,"#f58992");
-          var star4 = new Star(context,400,500,10,6,2,"#f8ff96");
-          var star5 = new Star(context,350,300,10,6,2,"#fcb890");
-          var star6 = new Star(context,200,400,10,7,2,"#ffeade");
-          var star7 = new Star(context,50,700,10,6,2,"#ffe38f");
-          var star8 = new Star(context,600,600,10,5,2,"#ffeade");
-          var star9 = new Star(context,650,250,10,5,2,"#ffeade");
+        var p1=[2,2];
+        var d1=[3,-1];
+
+        var p2=[4,0];
+        var d2=[1,3];
+
+        var p3=[6,2];
+        var d3=[1,-1];
+
+        var p4=[8,0];
+        var d4=[1,3];
+
+        var p5=[10,2];
+        var d5=[2,-1];
+       
+        
+        var P0 = [p0,d0,p1,d1]; // First two points and tangents
+        var P1 = [p1,d1,p2,d2]; 
+        var P2 = [p2,d2,p3,d3];
+        var P3 = [p3,d3,p4,d4];
+        var P4 = [p4,d4,p5,d5];
+
+        var C0 = function(t_) {return Cubic(Hermite,P0,t_);};
+        var C1 = function(t_) {return Cubic(Hermite,P1,t_);};
+        var C2 = function(t_) {return Cubic(Hermite,P2,t_);};
+        var C3 = function(t_) {return Cubic(Hermite,P3,t_);};
+        var C4 = function(t_) {return Cubic(Hermite,P4,t_);};
+
+        var Ccomp = function(t) {
+          if (t<1){
+            var u = t;
+            return C0(u);
+          } else if (t < 2) {
+            var u = t-1;
+            return C1(u)
+          } else if (t<3) {
+            var u = t-2;
+            return C2(u)
+          } else if (t<4) {
+            var u = t-3;
+            return C3(u);
+          } else {
+            var u = t-4;
+            return C4(u);
+          }
+        }
 
           // spiral function
           var start = 25.0;
@@ -62,40 +180,165 @@
           }
 
           // spiral objects
-          var Tspiral_to_canvas = mat3.create();
-          mat3.fromTranslation(Tspiral_to_canvas, [400,150]);
-          var spiral1 = new Spiral(context, 0.0, 5.0, 100, Cspiral, Tspiral_to_canvas, 400, 150, "rgba(193, 66, 66, 0)", "#ffeade", 25.0, 25.0);
+        var Tspiral_to_canvas = mat3.create();
+            mat3.fromTranslation(Tspiral_to_canvas, [100,150]);
+            var spiral1 = new Spiral(context, 0.0, 2.0, 100, Cspiral, Tspiral_to_canvas, 100, 150, 
+              "white", "rgba(198, 167, 252, .8)", 15,15);
 
-          var Tspiral_to_canvas2 = mat3.create();
-          mat3.fromTranslation(Tspiral_to_canvas2, [100,500]);
-          var spiral2 = new Spiral(context, 0.0, 5.0, 100, Cspiral, Tspiral_to_canvas2, 100, 550, "rgba(193, 66, 66, 0)", "#f8ff96", 25.0, 25.0);
+              var Tspiral_to_canvas = mat3.create();
+            mat3.fromTranslation(Tspiral_to_canvas, [700,200]);
+            var spiral2 = new Spiral(context, 0.0, 2.0, 100, Cspiral, Tspiral_to_canvas, 700, 200, 
+              "white", "rgba(255, 253, 138,.8)", 700, 200);
 
-          var Tspiral_to_canvas3 = mat3.create();
-          mat3.fromTranslation(Tspiral_to_canvas3, [300,450]);
-          var spiral3 = new Spiral(context, 0.0, 5.0, 100, Cspiral, Tspiral_to_canvas3, 550, 450, "rgba(193, 66, 66, 0)", "#fcb890", 25.0, 25.0);
-
-          var Tspiral_to_canvas4 = mat3.create();
-          mat3.fromTranslation(Tspiral_to_canvas4, [600,600]);
-          var spiral4 = new Spiral(context, 0.0, 5.0, 100, Cspiral, Tspiral_to_canvas4, 600, 600, "rgba(193, 66, 66, 0)", "#f58992", 25.0, 25.0);
-
-          // adding stars to the stars array
-          stars.push(star1);
-          stars.push(star2);
-          stars.push(star3);
-          stars.push(star4);
-          stars.push(star5);
-          stars.push(star6);
-          stars.push(star7);
-          stars.push(star8);
-          stars.push(star9);
+              var Tspiral_to_canvas = mat3.create();
+            mat3.fromTranslation(Tspiral_to_canvas, [400,300]);
+            var spiral3 = new Spiral(context, 0.0, 2.0, 100, Cspiral, Tspiral_to_canvas, 400, 300, 
+              "white", "rgba(255, 191, 218, .8)", 15,15);
 
           spirals.push(spiral1);
           spirals.push(spiral2);
           spirals.push(spiral3);
-          spirals.push(spiral4);
+
+          // more functions 
+         function moveToTx(loc, Tx) {
+            var res = vec2.create();
+            vec2.transformMat3(res, loc, Tx);
+            context.moveTo(res[0], res[1]);
+        }
+
+        function lineToTx(loc, Tx) {
+            var res = vec2.create();
+            vec2.transformMat3(res, loc, Tx);
+            context.lineTo(res[0], res[1]);
+        }
+
+        function arcToTx(cx, cy, r, sr, er, Tx) {
+          var res = vec2.create();
+          vec2.transformMat3(res, [cx, cy], Tx);
+          context.arc(res[0], res[1], r, sr, er);
+        }
+
+        function drawObject(Tx) {
+          // draws 3 body parts
+          context.beginPath();
+          context.fillStyle = "rgba(255, 51, 85)";
+          moveToTx([-.1,-.1],Tx);
+          lineToTx([-.1,.1],Tx);
+          lineToTx([.2,.1],Tx);
+          lineToTx([.2,-.1],Tx);
+          context.closePath();
+          context.fill(); 
+
+          context.beginPath();
+          context.fillStyle = "rgba(252, 252, 159)";
+          moveToTx([-.13,-.1],Tx);
+          lineToTx([-.13,.1],Tx);
+          lineToTx([-.2,.1],Tx);
+          lineToTx([-.2,-.1],Tx);
+          context.closePath();
+          context.fill();
+
+          context.beginPath();
+          context.fillStyle = "rgba(255, 183, 89)";
+          moveToTx([-.4,-.1],Tx);
+          lineToTx([-.4,.1],Tx);
+          lineToTx([-.24,.1],Tx);
+          lineToTx([-.24,-.1],Tx);
+          context.closePath();
+          context.fill();
+
+          // draws tail
+          context.beginPath();
+          context.fillStyle = "rgba(112, 203, 255)";
+          moveToTx([-.43,-.08],Tx);
+          lineToTx([-.43,.08],Tx);
+          lineToTx([-.65,.0],Tx);
+          lineToTx([-.43,-.08],Tx);
+          context.closePath();
+          context.fill();
+
+          // first circles color
+          context.beginPath();
+          context.fillStyle = "rgba(239,68,85,.9)";
+          arcToTx(xP1, yP1, rP1, 0, 2 * Math.PI, Tx);
+          context.fill();
+
+          context.beginPath();
+          context.fillStyle = "rgba(239,68,85,.8)";
+          arcToTx(xP2, yP2, rP2, 0, 2 * Math.PI, Tx);
+          context.fill();
+
+          context.beginPath();
+          context.fillStyle = "rgba(239,68,85,.6)";
+          arcToTx(xP3, yP3, rP3, 0, 2 * Math.PI, Tx);
+          context.fill();
+
+          context.beginPath();
+          context.fillStyle = "rgba(239,68,85,.5)";
+          arcToTx(xP4, yP4, rP4, 0, 2 * Math.PI, Tx);
+          context.fill();
+
+          // second circles color
+          context.beginPath();
+          context.fillStyle = "rgba(225,193,51,0.8)";
+          arcToTx(xB1, yB1, rB1, 0, 2 * Math.PI, Tx);
+          context.fill();
+
+          context.beginPath();
+          context.fillStyle = "rgba(225,193,51,.9)";
+          arcToTx(xB2, yB2, rB2, 0, 2 * Math.PI, Tx);
+          context.fill();
+
+          context.beginPath();
+          context.fillStyle = "rgba(225,193,51,.6)";
+          arcToTx(xB3, yB3, rB3, 0, 2 * Math.PI, Tx);
+          context.fill();
+
+          context.beginPath();
+          context.fillStyle = "rgba(225,193,51,.6)";
+          arcToTx(xB4, yB4, rB4, 0, 2 * Math.PI, Tx);
+          context.fill();
+
+          // third circles color
+          context.beginPath();
+          context.fillStyle = "rgba(153,184,61,.6)";
+          arcToTx(xG1, yG1, rG1, 0, 2 * Math.PI, Tx);
+          context.closePath();
+          context.fill();
+
+          context.beginPath();
+          context.fillStyle = "rgba(153,184,61,.7)";
+          arcToTx(xG2, yG2, rG2, 0, 2 * Math.PI, Tx);
+          context.closePath();
+          context.fill();
+
+          context.beginPath();
+          context.fillStyle = "rgba(153,184,61,.8)";
+          arcToTx(xG3, yG3, rG3, 0, 2 * Math.PI, Tx);
+          context.closePath();
+          context.fill();
+
+          context.beginPath();
+          context.fillStyle = "rgba(153,184,61,.9)";
+          arcToTx(xG4, yG4, rG4, 0, 2 * Math.PI, Tx);
+          context.closePath();
+          context.fill();
+      }
+
+        function drawTrajectory(start, end, intervals, C, Tx, color) {
+          context.strokeStyle = color;
+          context.lineWidth = 5;
+	        context.beginPath();
+          moveToTx(C(start),Tx);
+          for(var i = 1; i <= intervals; i++) {
+		        var t = ((intervals-i)/intervals) * start + (i/intervals) * end;
+		        lineToTx(C(t),Tx);
+          }
+          context.stroke();
+        }
 
           draw();  
-          } 
+        } 
 
       window.onload = App;
     </script>

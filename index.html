@@ -1,344 +1,392 @@
 <!doctype html>
 <html>
   <head>
-    <title>Space Scene</title>
+    <title>Camera</title>
     <link rel="stylesheet" href="index.css">
   </head>
   <body>
-    <canvas id="curves" width="1000" height="500"></canvas>
+    <canvas id="camera" width="1200" height="700"></canvas>
+    <input id="slider2" type="range" min="0" max="100"/>
     <script type="text/javascript" src="gl-matrix-min.js"></script>
-    <script src="Spiral.js"></script>
+    <script type="stylesheet" src="index.css"></script>
     <script>
         function App() {
-          var canvas = document.getElementById('curves');
+          var canvas = document.getElementById('camera');
           var context = canvas.getContext('2d');
           canvas.style.background = "black";
+          var slider2 = document.getElementById('slider2');
+          slider2.value = 0;
           var tParam = 0;
-          var spirals = [];
 
-          // first color
-          let xP1 = -(Math.random() * 0.8);
-          let yP1 = Math.random() * 0.8;
-          let rP1 = Math.random() * 6 + 2;
+        // first color
+        let xP1 = -(Math.random() * 2);
+        let yP1 = Math.random() * 0.8;
+        let rP1 = Math.random() * 20;
+       
+        let xP2 = -(Math.random() * 0.5);
+        let yP2 = Math.random() * 0.8;
+        let rP2 = Math.random() * 13 + 5;
 
-          let xP2 = -(Math.random() * 0.5);
-          let yP2 = Math.random() * 0.8;
-          let rP2 = Math.random() * 6 + 1;
+        let xP3 = -(Math.random() * 3);
+        let yP3 = -(Math.random() * 0.3);
+        let rP3 = Math.random() * 20 + 10;
 
-          let xP3 = -(Math.random() * 0.5);
-          let yP3 = -(Math.random() * 0.3);
-          let rP3 = Math.random() * 4;
-
-          let xP4 = -(Math.random() * 0.5);
-          let yP4 = Math.random() * 0.5;
-          let rP4 = Math.random() * 8 + 2;
+        let xP4 = -(Math.random() * 2.5);
+        let yP4 = Math.random() * 0.5;
+        let rP4 = Math.random()  * 20 + 5;
 
           // second color
-          let xB1 = -(Math.random() * 0.4);
+          let xB1 = -(Math.random() * 2);
           let yB1 = Math.random() * 0.6;
-          let rB1 = Math.random() * 4 + 1;
+          let rB1 = Math.random() * 10 + 4;
 
-          let xB2 = -(Math.random() * 0.5);
+          let xB2 = -(Math.random() * 2);
           let yB2 = Math.random() * 0.6;
-          let rB2 = Math.random() * 6 + 1;
+          let rB2 = Math.random() * 10 + 10;
 
-          let xB3 = -(Math.random() * 0.5);
+          let xB3 = -(Math.random() * 3);
           let yB3 = Math.random() * 0.3;
-          let rB3 = Math.random() * 7 + 1;
+          let rB3 = Math.random() * 10 + 4;
 
-          let xB4 = -(Math.random() * 0.3);
+          let xB4 = -(Math.random() * 2.5);
           let yB4 = -(Math.random() * 0.4);
-          let rB4 = Math.random() * 6;
+          let rB4 = Math.random() * 10 + 10;
 
           // third color
-          let xG1 = -(Math.random() * 0.4);
+          let xG1 = -(Math.random() * 2);
           let yG1 = Math.random() * 0.2;
-          let rG1 = Math.random() * 4 + 1;
+          let rG1 = Math.random() * 7 + 15;
 
-          let xG2 = -(Math.random() * 0.3);
+          let xG2 = -(Math.random() * 3);
           let yG2 = Math.random() * 0.4;
-          let rG2 = Math.random() * 2 + 1;
+          let rG2 = Math.random() * 8 + 10;
 
-          let xG3 = -(Math.random() * 0.5);
+          let xG3 =-(Math.random() * 2);
           let yG3 = Math.random() * 0.5;
-          let rG3 = Math.random() * 6 + 2;
+          let rG3 = Math.random() * 12;
 
-          let xG4 = -(Math.random() * 0.5);
+          let xG4 = -(Math.random() * 3);
           let yG4 = -(Math.random() * 0.3);
-          let rG4 = Math.random() * 8;
+          let rG4 = Math.random() * 10 + 15;
           
-  
+          
           function draw() {
             context.clearRect(0, 0, canvas.width, canvas.height);
-           
-            var curve_to_canvas = mat3.create();
-            mat3.fromTranslation(curve_to_canvas,[0,350]);
-	          mat3.scale(curve_to_canvas,curve_to_canvas,[100,-150]);
 
-            context.setLineDash([15, 10]);
-            drawTrajectory(0.0,1.0,100,C0,curve_to_canvas,"#868387");
-	          drawTrajectory(0.0,1.0,100,C1,curve_to_canvas,"#868387");
-            drawTrajectory(0.0,1.0,100,C2,curve_to_canvas,"#868387");
-            drawTrajectory(0.0,1.0,100,C3,curve_to_canvas,"#868387");
-            drawTrajectory(0.0,1.0,100,C4,curve_to_canvas,"#868387");
+            canvas.width = canvas.width;
 
-            context.setLineDash([2, 10]);
-            var Tgreen_to_blue = mat3.create();
-            mat3.fromTranslation(Tgreen_to_blue, Ccomp(tParam));
-            var coaster_to_canvas = mat3.create();
-            mat3.multiply(coaster_to_canvas, curve_to_canvas, Tgreen_to_blue);
-            drawObject(coaster_to_canvas);
+            var viewAngle = slider2.value * 0.02 * Math.PI;
 
-            spirals.forEach(spiral => spiral.update());
-            spirals.forEach(spiral => spiral.draw());
+            // Create ViewPort transform
+            var Tviewport = mat4.create();
+            mat4.fromTranslation(Tviewport, [400, 350, 0]);
+            mat4.scale(Tviewport, Tviewport, [80, -100, 1]);
+
+            // Create Camera (lookAt) transform
+            var locCamera = vec3.create();
+            var distCamera = 400.0;
+            locCamera[0] = distCamera * Math.sin(viewAngle);
+            locCamera[1] = 100;
+            locCamera[2] = distCamera * Math.cos(viewAngle);
+            var locTarget = vec3.fromValues(0, 0, 0);
+            var vecUp = vec3.fromValues(0, 1, 0);
+            var TlookAt = mat4.create();
+            mat4.lookAt(TlookAt, locCamera, locTarget, vecUp);
+
+            // Create transform t_VP_CAM that incorporates Viewport and Camera transformations
+            var tVP_CAM = mat4.create();
+            mat4.multiply(tVP_CAM, Tviewport, TlookAt);
+
+            // Create observer projection transform
+            var TprojectionObserver = mat4.create();
+            mat4.ortho(TprojectionObserver,-120,120,-120,120,-1,1);
+
+             // Create transform t_VP_PROJ_CAM that incorporates Viewport, projection and camera transforms
+            var tVP_PROJ_VIEW_Observer = mat4.create();
+            mat4.multiply(tVP_PROJ_VIEW_Observer,Tviewport,TprojectionObserver);
+            mat4.multiply(tVP_PROJ_VIEW_Observer,tVP_PROJ_VIEW_Observer,TlookAt);
+
+            context.setLineDash([5, 10]);
+            drawTrajectory(0.0,1.0,100,C0,tVP_CAM,"#868387");
+	        drawTrajectory(0.0,1.0,100,C1,tVP_CAM,"#868387");
+            drawTrajectory(0.0,1.0,100,C2,tVP_CAM,"#868387");
+            drawTrajectory(0.0,1.0,100,C3,tVP_CAM,"#868387");
+            drawTrajectory(0.0,1.0,100,C4,tVP_CAM,"#868387")
+
+            // Create model(ing) transform (from moving object to world)
+            var Tmodel = mat4.create();
+            mat4.fromTranslation(Tmodel, Ccomp(tParam));
+            var tangent = Ccomp_tangent(tParam);
+            var angle = Math.atan2(tangent[1], tangent[0]);
+            mat4.rotateZ(Tmodel, Tmodel, angle);
+
+            // Create transform t_VP_CAM_MOD that incorporates Viewport, camera, and modeling transform
+            var tVP_CAM_MOD = mat4.create();
+            mat4.multiply(tVP_CAM_MOD, tVP_CAM, Tmodel);
+            // draw3DAxes("green", tVP_CAM_MOD);
+            drawObject(tVP_CAM_MOD);
+
 
             if (tParam > 5) {
               tParam = 0;
             } else {
               tParam += 1 * 0.01;
             }
-    
+
             window.requestAnimationFrame(draw);
-          }
-          var Hermite = function(t) {
-	          return [
-              2*t*t*t-3*t*t+1,
-              t*t*t-2*t*t+t,
-              -2*t*t*t+3*t*t,
-              t*t*t-t*t
-            ];
+            
           }
 
-        function Cubic(basis,P,t){
-            var b = basis(t);
-            var result=vec2.create();
-            vec2.scale(result,P[0],b[0]);
-            vec2.scaleAndAdd(result,result,P[1],b[1]);
-            vec2.scaleAndAdd(result,result,P[2],b[2]);
-            vec2.scaleAndAdd(result,result,P[3],b[3]);
-            return result;
-        }
+           function moveToTx(loc, Tx) {
+                var res = vec3.create();
+                vec3.transformMat4(res, loc, Tx);
+                context.moveTo(res[0], res[1]);
+            }
 
-        var p0=[0,0];
-        var d0=[0,0];
+            function lineToTx(loc, Tx) {
+                var res = vec3.create();
+                vec3.transformMat4(res, loc, Tx);
+                context.lineTo(res[0], res[1]);
+            }
 
-        var p1=[2,2];
-        var d1=[3,-1];
+            function arcToTx(cx, cy, r, sr, er, Tx) {
+                var res = vec2.create();
+                vec2.transformMat4(res, [cx, cy], Tx);
+                context.arc(res[0], res[1], r, sr, er);
+            }
 
-        var p2=[4,0];
-        var d2=[1,3];
+            function rectToTx(x, y, w, h, Tx) {
+                var res = vec2.create();
+                vec2.transformMat4(res, [x, y], Tx);
+                context.rect(res[0], res[1], w, h);
+            }
 
-        var p3=[6,2];
-        var d3=[1,-1];
+            function drawObject(Tx) {
+                // draw cube
+                context.beginPath();
+                context.fillStyle = "rgba(255, 51, 85,.8)";
+                rectToTx(-.5,-.1,50,50,Tx);
+                context.fill();
 
-        var p4=[8,0];
-        var d4=[1,3];
+                // draw cube
+                context.beginPath();
+                context.fillStyle = "rgba(252, 252, 159.8)";
+                rectToTx(-1,-.1,30,50,Tx);
+                context.fill();
 
-        var p5=[10,2];
-        var d5=[2,-1];
-       
+                // draw cube
+                context.beginPath();
+                context.fillStyle = "rgba(255, 183, 89.8)";
+                rectToTx(-1.6,-.15,40,40,Tx);
+                context.fill();
+
+                // // draws tail
+                // context.beginPath();
+                // context.fillStyle = "rgba(112, 203, 255)";
+                // moveToTx([-.2,-.15, 0],Tx);
+                // lineToTx([-.43,.08, 0],Tx);
+                // lineToTx([-.65,.0, 0],Tx);
+                // lineToTx([-.43,-.08, 0],Tx);
+                // context.closePath();
+                // context.fill();
+
+
+                // first circles color
+                context.beginPath();
+                context.fillStyle = "rgba(239,68,85,.9)";
+                arcToTx(xP1, yP1, rP1, 0, 2 * Math.PI, Tx);
+                context.fill();
+
+                context.beginPath();
+                context.fillStyle = "rgba(239,68,85,.8)";
+                arcToTx(xP2, yP2, rP2, 0, 2 * Math.PI, Tx);
+                context.fill();
+
+                context.beginPath();
+                context.fillStyle = "rgba(239,68,85,.6)";
+                arcToTx(xP3, yP3, rP3, 0, 2 * Math.PI, Tx);
+                context.fill();
+
+                context.beginPath();
+                context.fillStyle = "rgba(239,68,85,.5)";
+                arcToTx(xP4, yP4, rP4, 0, 2 * Math.PI, Tx);
+                context.fill();
+
+                // second circles color
+                context.beginPath();
+                context.fillStyle = "rgba(225,193,51,0.8)";
+                arcToTx(xB1, yB1, rB1, 0, 2 * Math.PI, Tx);
+                context.fill();
+
+                context.beginPath();
+                context.fillStyle = "rgba(225,193,51,.9)";
+                arcToTx(xB2, yB2, rB2, 0, 2 * Math.PI, Tx);
+                context.fill();
+
+                context.beginPath();
+                context.fillStyle = "rgba(225,193,51,.6)";
+                arcToTx(xB3, yB3, rB3, 0, 2 * Math.PI, Tx);
+                context.fill();
+
+                context.beginPath();
+                context.fillStyle = "rgba(225,193,51,.6)";
+                arcToTx(xB4, yB4, rB4, 0, 2 * Math.PI, Tx);
+                context.fill();
+
+                // third circles color
+                context.beginPath();
+                context.fillStyle = "rgba(153,184,61,.6)";
+                arcToTx(xG1, yG1, rG1, 0, 2 * Math.PI, Tx);
+                context.closePath();
+                context.fill();
+
+                context.beginPath();
+                context.fillStyle = "rgba(153,184,61,.7)";
+                arcToTx(xG2, yG2, rG2, 0, 2 * Math.PI, Tx);
+                context.closePath();
+                context.fill();
+
+                context.beginPath();
+                context.fillStyle = "rgba(153,184,61,.8)";
+                arcToTx(xG3, yG3, rG3, 0, 2 * Math.PI, Tx);
+                context.closePath();
+                context.fill();
+
+                context.beginPath();
+                context.fillStyle = "rgba(153,184,61,.9)";
+                arcToTx(xG4, yG4, rG4, 0, 2 * Math.PI, Tx);
+                context.closePath();
+                context.fill();
+            }
+
+            var Hermite = function(t) {
+                return [
+                2 * t * t * t - 3 * t * t + 1,
+                t * t * t - 2 * t * t + t,
+                -2 * t * t * t + 3 * t * t,
+                t * t * t - t * t
+                ];
+            }
+
+            var HermiteDerivative = function(t) {
+                return [
+                6 * t * t - 6 * t,
+                3 * t * t - 4 * t + 1,
+                -6 * t * t + 6 * t,
+                3 * t * t - 2 * t
+                ];
+            }
+
+            function Cubic(basis, P, t) {
+                var b = basis(t);
+                var result = vec3.create();
+                vec3.scale(result, P[0], b[0]);
+                vec3.scaleAndAdd(result, result, P[1], b[1]);
+                vec3.scaleAndAdd(result, result, P[2], b[2]);
+                vec3.scaleAndAdd(result, result, P[3], b[3]);
+                return result;
+            }
+
+            // my values
+            var p0=[0,0,.5];
+            var d0=[0,0,.5];
+
+            var p1=[2,2,-1];
+            var d1=[3,-1,-1];
+
+            var p2=[4,0,.5];
+            var d2=[1,3,.5];
+
+            var p3=[6,2,-.5];
+            var d3=[1,-1,-.5];
+
+            var p4=[8,0,.3];
+            var d4=[1,3,.3];
+
+            var p5=[10,2,0];
+            var d5=[2,-1,0];
         
-        var P0 = [p0,d0,p1,d1]; // First two points and tangents
-        var P1 = [p1,d1,p2,d2]; 
-        var P2 = [p2,d2,p3,d3];
-        var P3 = [p3,d3,p4,d4];
-        var P4 = [p4,d4,p5,d5];
+        
+            var P0 = [p0,d0,p1,d1]; // First two points and tangents
+            var P1 = [p1,d1,p2,d2]; 
+            var P2 = [p2,d2,p3,d3];
+            var P3 = [p3,d3,p4,d4];
+            var P4 = [p4,d4,p5,d5];
 
-        var C0 = function(t_) {return Cubic(Hermite,P0,t_);};
-        var C1 = function(t_) {return Cubic(Hermite,P1,t_);};
-        var C2 = function(t_) {return Cubic(Hermite,P2,t_);};
-        var C3 = function(t_) {return Cubic(Hermite,P3,t_);};
-        var C4 = function(t_) {return Cubic(Hermite,P4,t_);};
+            var C0 = function(t_) {return Cubic(Hermite,P0,t_);};
+            var C1 = function(t_) {return Cubic(Hermite,P1,t_);};
+            var C2 = function(t_) {return Cubic(Hermite,P2,t_);};
+            var C3 = function(t_) {return Cubic(Hermite,P3,t_);};
+            var C4 = function(t_) {return Cubic(Hermite,P4,t_);};
 
-        var Ccomp = function(t) {
-          if (t<1){
-            var u = t;
-            return C0(u);
-          } else if (t < 2) {
-            var u = t-1;
-            return C1(u)
-          } else if (t<3) {
-            var u = t-2;
-            return C2(u)
-          } else if (t<4) {
-            var u = t-3;
-            return C3(u);
-          } else {
-            var u = t-4;
-            return C4(u);
-          }
+            var C0prime = function(t_) {
+                return Cubic(HermiteDerivative, P0, t_);
+            };
+            var C1prime = function(t_) {
+                return Cubic(HermiteDerivative, P1, t_);
+            };
+            var C2prime = function(t_) {
+                return Cubic(HermiteDerivative, P2, t_);
+            };
+            var C3prime = function(t_) {
+                return Cubic(HermiteDerivative, P3, t_);
+            };
+            var C4prime = function(t_) {
+                return Cubic(HermiteDerivative, P4, t_);
+            };
+            
+            var Ccomp = function(t) {
+            if (t<1){
+                var u = t;
+                return C0(u);
+            } else if (t < 2) {
+                var u = t-1;
+                return C1(u)
+            } else if (t<3) {
+                var u = t-2;
+                return C2(u)
+            } else if (t<4) {
+                var u = t-3;
+                return C3(u);
+            } else {
+                var u = t-4;
+                return C4(u);
+            }
+            }
+
+            var Ccomp_tangent = function(t) {
+                if (t<1){
+                    var u = t;
+                    return C0prime(u);
+                } else if (t < 2) {
+                    var u = t-1;
+                    return C1prime(u)
+                } else if (t<3) {
+                    var u = t-2;
+                    return C2prime(u)
+                } else if (t<4) {
+                    var u = t-3;
+                    return C3prime(u);
+                } else {
+                    var u = t-4;
+                    return C4prime(u);
+                }
+            }
+
+            function drawTrajectory(t_begin, t_end, intervals, C, Tx, color) {
+                context.strokeStyle = color;
+                context.lineWidth = 5;
+                context.beginPath();
+                moveToTx(C(t_begin), Tx);
+                for (var i = 1; i <= intervals; i++) {
+                    var t = ((intervals - i) / intervals) * t_begin + (i / intervals) * t_end;
+                    lineToTx(C(t), Tx);
+                }
+                context.stroke();
+            }
+
+            draw();   
         }
-
-          // spiral function
-          var start = 25.0;
-          var slope = 25.0;
-          var Cspiral = function(t) {
-              var R = slope * t + start;
-              var x = R * Math.cos(2.0 * Math.PI * t);
-              var y = R * Math.sin(2.0 * Math.PI * t);
-              return [x,y];
-          }
-
-          // spiral objects
-        var Tspiral_to_canvas = mat3.create();
-            mat3.fromTranslation(Tspiral_to_canvas, [100,150]);
-            var spiral1 = new Spiral(context, 0.0, 2.0, 100, Cspiral, Tspiral_to_canvas, 100, 150, 
-              "white", "rgba(198, 167, 252, .8)", 15,15);
-
-              var Tspiral_to_canvas = mat3.create();
-            mat3.fromTranslation(Tspiral_to_canvas, [700,200]);
-            var spiral2 = new Spiral(context, 0.0, 2.0, 100, Cspiral, Tspiral_to_canvas, 700, 200, 
-              "white", "rgba(255, 253, 138,.8)", 700, 200);
-
-              var Tspiral_to_canvas = mat3.create();
-            mat3.fromTranslation(Tspiral_to_canvas, [400,300]);
-            var spiral3 = new Spiral(context, 0.0, 2.0, 100, Cspiral, Tspiral_to_canvas, 400, 300, 
-              "white", "rgba(255, 191, 218, .8)", 15,15);
-
-          spirals.push(spiral1);
-          spirals.push(spiral2);
-          spirals.push(spiral3);
-
-          // more functions 
-         function moveToTx(loc, Tx) {
-            var res = vec2.create();
-            vec2.transformMat3(res, loc, Tx);
-            context.moveTo(res[0], res[1]);
-        }
-
-        function lineToTx(loc, Tx) {
-            var res = vec2.create();
-            vec2.transformMat3(res, loc, Tx);
-            context.lineTo(res[0], res[1]);
-        }
-
-        function arcToTx(cx, cy, r, sr, er, Tx) {
-          var res = vec2.create();
-          vec2.transformMat3(res, [cx, cy], Tx);
-          context.arc(res[0], res[1], r, sr, er);
-        }
-
-        function drawObject(Tx) {
-          // draws 3 body parts
-          context.beginPath();
-          context.fillStyle = "rgba(255, 51, 85)";
-          moveToTx([-.1,-.1],Tx);
-          lineToTx([-.1,.1],Tx);
-          lineToTx([.2,.1],Tx);
-          lineToTx([.2,-.1],Tx);
-          context.closePath();
-          context.fill(); 
-
-          context.beginPath();
-          context.fillStyle = "rgba(252, 252, 159)";
-          moveToTx([-.13,-.1],Tx);
-          lineToTx([-.13,.1],Tx);
-          lineToTx([-.2,.1],Tx);
-          lineToTx([-.2,-.1],Tx);
-          context.closePath();
-          context.fill();
-
-          context.beginPath();
-          context.fillStyle = "rgba(255, 183, 89)";
-          moveToTx([-.4,-.1],Tx);
-          lineToTx([-.4,.1],Tx);
-          lineToTx([-.24,.1],Tx);
-          lineToTx([-.24,-.1],Tx);
-          context.closePath();
-          context.fill();
-
-          // draws tail
-          context.beginPath();
-          context.fillStyle = "rgba(112, 203, 255)";
-          moveToTx([-.43,-.08],Tx);
-          lineToTx([-.43,.08],Tx);
-          lineToTx([-.65,.0],Tx);
-          lineToTx([-.43,-.08],Tx);
-          context.closePath();
-          context.fill();
-
-          // first circles color
-          context.beginPath();
-          context.fillStyle = "rgba(239,68,85,.9)";
-          arcToTx(xP1, yP1, rP1, 0, 2 * Math.PI, Tx);
-          context.fill();
-
-          context.beginPath();
-          context.fillStyle = "rgba(239,68,85,.8)";
-          arcToTx(xP2, yP2, rP2, 0, 2 * Math.PI, Tx);
-          context.fill();
-
-          context.beginPath();
-          context.fillStyle = "rgba(239,68,85,.6)";
-          arcToTx(xP3, yP3, rP3, 0, 2 * Math.PI, Tx);
-          context.fill();
-
-          context.beginPath();
-          context.fillStyle = "rgba(239,68,85,.5)";
-          arcToTx(xP4, yP4, rP4, 0, 2 * Math.PI, Tx);
-          context.fill();
-
-          // second circles color
-          context.beginPath();
-          context.fillStyle = "rgba(225,193,51,0.8)";
-          arcToTx(xB1, yB1, rB1, 0, 2 * Math.PI, Tx);
-          context.fill();
-
-          context.beginPath();
-          context.fillStyle = "rgba(225,193,51,.9)";
-          arcToTx(xB2, yB2, rB2, 0, 2 * Math.PI, Tx);
-          context.fill();
-
-          context.beginPath();
-          context.fillStyle = "rgba(225,193,51,.6)";
-          arcToTx(xB3, yB3, rB3, 0, 2 * Math.PI, Tx);
-          context.fill();
-
-          context.beginPath();
-          context.fillStyle = "rgba(225,193,51,.6)";
-          arcToTx(xB4, yB4, rB4, 0, 2 * Math.PI, Tx);
-          context.fill();
-
-          // third circles color
-          context.beginPath();
-          context.fillStyle = "rgba(153,184,61,.6)";
-          arcToTx(xG1, yG1, rG1, 0, 2 * Math.PI, Tx);
-          context.closePath();
-          context.fill();
-
-          context.beginPath();
-          context.fillStyle = "rgba(153,184,61,.7)";
-          arcToTx(xG2, yG2, rG2, 0, 2 * Math.PI, Tx);
-          context.closePath();
-          context.fill();
-
-          context.beginPath();
-          context.fillStyle = "rgba(153,184,61,.8)";
-          arcToTx(xG3, yG3, rG3, 0, 2 * Math.PI, Tx);
-          context.closePath();
-          context.fill();
-
-          context.beginPath();
-          context.fillStyle = "rgba(153,184,61,.9)";
-          arcToTx(xG4, yG4, rG4, 0, 2 * Math.PI, Tx);
-          context.closePath();
-          context.fill();
-      }
-
-        function drawTrajectory(start, end, intervals, C, Tx, color) {
-          context.strokeStyle = color;
-          context.lineWidth = 5;
-	        context.beginPath();
-          moveToTx(C(start),Tx);
-          for(var i = 1; i <= intervals; i++) {
-		        var t = ((intervals-i)/intervals) * start + (i/intervals) * end;
-		        lineToTx(C(t),Tx);
-          }
-          context.stroke();
-        }
-
-          draw();  
-        } 
 
       window.onload = App;
     </script>
